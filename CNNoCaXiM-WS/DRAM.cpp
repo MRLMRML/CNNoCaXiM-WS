@@ -59,7 +59,7 @@ void DRAM::receiveReadRequest()
 				std::string line{};
 				std::istringstream lineInString{};
 				std::string data{};
-				for (int i{}; i < m_slaveInterface.readAddressChannel.ARADDR - WEIGHT_DATA_START_LOCATION + 1; ++i)
+				for (int i{}; i < m_slaveInterface.readAddressChannel.ARADDR - INPUT_DATA_START_LOCATION + 1; ++i)
 					std::getline(readInputData, line);
 				lineInString.str(line);
 				while (std::getline(lineInString, data, ','))
@@ -68,7 +68,7 @@ void DRAM::receiveReadRequest()
 				m_slaveInterface.readDataChannel.RDATA = t_RDATA;
 				m_slaveInterface.readAddressChannel.ARREADY = true;
 				logDebug(" DRAM: read request for input data received ");
-				recordInputReadTime();
+				m_timer->recordInputReadTime();
 			}
 			else
 				throw std::out_of_range{ " DRAM: read request out of range " };
@@ -123,7 +123,7 @@ void DRAM::receiveWriteRequest()
 				m_slaveInterface.writeAddressChannel.AWREADY = true;
 				m_slaveInterface.writeDataChannel.WREADY = true;
 				logDebug(" DRAM: write request received ");
-				recordOutputWrittenTime();
+				m_timer->recordOutputWrittenTime();
 			}
 			else
 				throw std::out_of_range{ " DRAM: write request out of range " };
@@ -143,18 +143,4 @@ void DRAM::sendWriteResponse()
 	m_localClock->tickTriggerClock(1);
 	m_localClock->tickExecutionClock(1);
 	m_localClock->toggleWaitingForExecution();
-}
-
-void DRAM::recordInputReadTime()
-{
-	std::ofstream writeInputReadTime(g_recordFolderPath + g_timingRecordPath, std::ios::app); // append
-	writeInputReadTime << m_localClock->s_globalClock + 1 << ",";
-	writeInputReadTime.close();
-}
-
-void DRAM::recordOutputWrittenTime()
-{
-	std::ofstream writeOutputWrittenTime(g_recordFolderPath + g_timingRecordPath, std::ios::app); // append
-	writeOutputWrittenTime << m_localClock->s_globalClock + 1 << "," << std::endl;
-	writeOutputWrittenTime.close();
 }

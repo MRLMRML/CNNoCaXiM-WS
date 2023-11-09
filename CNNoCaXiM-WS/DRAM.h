@@ -3,6 +3,7 @@
 #include "SlaveInterface.h"
 #include "Log.h"
 #include "Clock.h"
+#include "Timer.h"
 #include <fstream>
 #include <sstream>
 #include <cstdio>
@@ -30,13 +31,11 @@ public:
 	void receiveWriteRequest();
 	void sendWriteResponse();
 
-	void recordInputReadTime();
-	void recordOutputWrittenTime();
-
 public:
 	DRAMState m_dramState{};
 	SlaveInterface m_slaveInterface{ };
 	std::shared_ptr<Clock> m_localClock{ nullptr };
+	std::unique_ptr<Timer> m_timer{ std::make_unique<Timer>() };
 
 private:
 };

@@ -134,6 +134,9 @@
     <ClInclude Include="PE.h">
       <Filter>Header Files\Terminal\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header Files\Peripherals</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Crossbar.cpp">
@@ -189,6 +192,9 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source Files\Peripherals</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -53,49 +53,37 @@ void NI::assemblePacket()
 	//while (receiveFlit())
 	if (receiveFlit())
 	{
-		if (!m_localClock->isWaitingForExecution())
+		if (m_flitReorderBuffer.back().flitType == FlitType::HeadTailFlit)
 		{
-			if (m_niState == NIState::W)
-				m_localClock->tickExecutionClock(EXECUTION_TIME_NI_WI - 1);
-			else if (m_niState == NIState::I)
-				m_localClock->tickExecutionClock(EXECUTION_TIME_NI_IO - 1);
-			m_localClock->toggleWaitingForExecution();
+			Packet packet{ m_flitReorderBuffer.back().destination, m_flitReorderBuffer.back().xID,
+				m_flitReorderBuffer.back().RWQB, m_flitReorderBuffer.back().MID, m_flitReorderBuffer.back().SID,
+				m_flitReorderBuffer.back().SEQID, m_flitReorderBuffer.back().AxADDR, m_flitReorderBuffer.back().xDATA };
+			m_flitReorderBuffer.pop_back();
+			receivePacket(packet);
+			return;
 		}
 
-		if (m_localClock->executeLocalEvent())
+		if (m_flitReorderBuffer.back().flitType == FlitType::TailFlit)
 		{
-			if (m_flitReorderBuffer.back().flitType == FlitType::HeadTailFlit)
+			std::vector<Flit> t_flitReorderBuffer{ m_flitReorderBuffer };
+			for (auto& flit : t_flitReorderBuffer) // find the flits that have the same IDs and erase them from flit reorder buffer
 			{
-				Packet packet{ m_flitReorderBuffer.back().destination, m_flitReorderBuffer.back().xID,
-					m_flitReorderBuffer.back().RWQB, m_flitReorderBuffer.back().MID, m_flitReorderBuffer.back().SID,
-					m_flitReorderBuffer.back().SEQID, m_flitReorderBuffer.back().AxADDR, m_flitReorderBuffer.back().xDATA };
-				m_flitReorderBuffer.pop_back();
-				receivePacket(packet);
-				return;
-			}
-
-			if (m_flitReorderBuffer.back().flitType == FlitType::TailFlit)
-			{
-				std::vector<Flit> t_flitReorderBuffer{ m_flitReorderBuffer };
-				for (auto& flit : t_flitReorderBuffer) // find the flits that have the same IDs and erase them from flit reorder buffer
+				if (flit.xID == m_flitReorderBuffer.back().xID &&
+					flit.MID == m_flitReorderBuffer.back().MID &&
+					flit.SEQID == m_flitReorderBuffer.back().SEQID)
 				{
-					if (flit.xID == m_flitReorderBuffer.back().xID &&
-						flit.MID == m_flitReorderBuffer.back().MID &&
-						flit.SEQID == m_flitReorderBuffer.back().SEQID)
+					if (flit.flitType == FlitType::HeadFlit) // find the head flit and get the data
 					{
-						if (flit.flitType == FlitType::HeadFlit) // find the head flit and get the data
-						{
-							Packet packet{ flit.destination, flit.xID,
-							flit.RWQB, flit.MID, flit.SID,
-							flit.SEQID, m_flitReorderBuffer.back().AxADDR, m_flitReorderBuffer.back().xDATA };
-							receivePacket(packet);
-						}
-						std::erase(m_flitReorderBuffer, flit); // C++20
-						//m_flitReorderBuffer.erase(std::remove(m_flitReorderBuffer.begin(), m_flitReorderBuffer.end(), flit), m_flitReorderBuffer.end());
+						Packet packet{ flit.destination, flit.xID,
+						flit.RWQB, flit.MID, flit.SID,
+						flit.SEQID, m_flitReorderBuffer.back().AxADDR, m_flitReorderBuffer.back().xDATA };
+						receivePacket(packet);
 					}
+					std::erase(m_flitReorderBuffer, flit); // C++20
+					//m_flitReorderBuffer.erase(std::remove(m_flitReorderBuffer.begin(), m_flitReorderBuffer.end(), flit), m_flitReorderBuffer.end());
 				}
-				return;
 			}
+			return;
 		}
 	}
 }
@@ -129,22 +117,31 @@ void NI::receivePacket(const Packet packet)
 
 void NI::sendReadResponse(Packet packet)
 {
-	m_slaveInterface.readDataChannel.RVALID = true;
-	m_slaveInterface.readDataChannel.RID = packet.xID;
-	m_slaveInterface.readDataChannel.RDATA = packet.xDATA;
-	m_SEQID = packet.SEQID;
-	if (m_niState == NIState::W)
+	if (!m_localClock->isWaitingForExecution())
 	{
-		m_niState = NIState::I;
-
-		m_localClock->tickTriggerClock(1);
-		m_localClock->tickExecutionClock(1);
+		if (m_niState == NIState::W)
+			m_localClock->tickExecutionClock(EXECUTION_TIME_NI_WI - 1);
+		else if (m_niState == NIState::I)
+		{
+			m_localClock->tickExecutionClock(EXECUTION_TIME_NI_IO - 1);
+			m_timer->recordPacketTimeAppendStart(packet.SEQID);
+		}
 		m_localClock->toggleWaitingForExecution();
 	}
-	else if (m_niState == NIState::I)
-	{
-		m_niState = NIState::O;
 
+	if (m_localClock->executeLocalEvent())
+	{
+		m_slaveInterface.readDataChannel.RVALID = true;
+		m_slaveInterface.readDataChannel.RID = packet.SEQID;
+		m_slaveInterface.readDataChannel.RDATA = packet.xDATA;
+		m_xID = packet.xID;
+		if (m_niState == NIState::W)
+			m_niState = NIState::I;
+		else if (m_niState == NIState::I)
+		{
+			m_niState = NIState::O;
+			m_timer->recordPacketTimeAppendFinish(packet.SEQID);
+		}
 		m_localClock->tickTriggerClock(1);
 		m_localClock->tickExecutionClock(1);
 		m_localClock->toggleWaitingForExecution();
@@ -159,21 +156,26 @@ void NI::receiveWriteOutputRequest()
 		{
 			m_localClock->tickExecutionClock(EXECUTION_TIME_NI_OI - 1);
 			m_localClock->toggleWaitingForExecution();
+
+			m_timer->recordPacketTimeAppendStart(m_slaveInterface.writeAddressChannel.AWID);
 		}
 
 		if (m_localClock->executeLocalEvent())
 		{
 			Packet writeRequest{};
 			writeRequest.destination = m_DRAMID;
-			writeRequest.xID = m_slaveInterface.writeAddressChannel.AWID;
+			writeRequest.xID = m_xID;
 			writeRequest.RWQB = PacketType::WriteRequest;
 			writeRequest.MID = m_NID;
 			writeRequest.SID = m_DRAMID;
-			writeRequest.SEQID = m_SEQID;
-			writeRequest.AxADDR = m_slaveInterface.writeAddressChannel.AWADDR;
+			writeRequest.SEQID = m_slaveInterface.writeAddressChannel.AWID;
+			writeRequest.AxADDR = m_xID; // AxADDR is the xID of the packet
 			writeRequest.xDATA = m_slaveInterface.writeDataChannel.WDATA;
 
 			sendPacket(writeRequest);
+
+			m_timer->recordPacketTimeAppendFinish(writeRequest.SEQID);
+
 			m_slaveInterface.writeAddressChannel.AWREADY = true;
 			m_slaveInterface.writeDataChannel.WREADY = true;
 			m_niState = NIState::I;

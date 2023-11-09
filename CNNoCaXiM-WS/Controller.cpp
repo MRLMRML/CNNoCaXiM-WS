@@ -149,6 +149,8 @@ void Controller::receiveReadInputResponse()
 
 			sendPacket(readResponse);
 			
+			m_timer->recordPacketTimeInitializeFinish(readResponse.SEQID);
+
 			++m_reformedInputDataIndex;
 			
 			m_masterInterface.readDataChannel.RREADY = true;
@@ -318,6 +320,7 @@ void Controller::receivePacket(const Packet& packet)
 void Controller::sendWriteOutputRequest(const Packet& packet)
 {
 	m_outputData.insert(m_outputData.end(), packet.xDATA.begin(), packet.xDATA.end());
+	m_timer->recordPacketTimeAppendStart(packet.SEQID);
 	if (m_outputData.size() == m_reformedInputData.size())
 	{
 		if (!m_localClock->isWaitingForExecution())
@@ -364,6 +367,8 @@ void Controller::sendWriteOutputRequest(const Packet& packet)
 				readResponse.xDATA = m_reformedInputData.at(m_reformedInputDataIndex);
 
 				sendPacket(readResponse);
+
+				m_timer->recordPacketTimeInitializeFinish(readResponse.SEQID);
 
 				++m_reformedInputDataIndex;
 

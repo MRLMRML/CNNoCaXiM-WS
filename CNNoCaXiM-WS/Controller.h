@@ -4,6 +4,7 @@
 #include "Port.h"
 #include "Log.h"
 #include "Clock.h"
+#include "Timer.h"
 #include <algorithm>
 #include <cmath>
 
@@ -48,6 +49,7 @@ public:
 	std::vector<std::vector<DATA_PRECISION>> m_reformedInputData{};
 	std::vector<DATA_PRECISION> m_outputData{};
 	std::shared_ptr<Clock> m_localClock{ nullptr };
+	std::unique_ptr<Timer> m_timer{ std::make_unique<Timer>() };
 
 private:
 	std::deque<Flit> m_sourceQueue{}; // store the flits to be sent

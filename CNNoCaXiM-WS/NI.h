@@ -5,6 +5,7 @@
 #include "Port.h"
 #include "Log.h"
 #include "Clock.h"
+#include "Timer.h"
 #include <algorithm>
 #include <cmath>
 
@@ -37,8 +38,10 @@ public:
 	SlaveInterface m_slaveInterface{ };
 	int m_NID{}; // node ID of this PE
 	int m_DRAMID{}; // node ID of DRAM
-	int m_SEQID{ -1 };
+	//int m_SEQID{ -1 };
+	int m_xID{ -1 };
 	std::shared_ptr<Clock> m_localClock{ nullptr };
+	std::unique_ptr<Timer> m_timer{ std::make_unique<Timer>() };
 
 private:
 	std::deque<Flit> m_sourceQueue{}; // store the flits to be sent
