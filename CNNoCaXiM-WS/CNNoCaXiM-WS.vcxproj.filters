@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Network">
+      <UniqueIdentifier>{3f30ae8d-6d6a-47a6-b684-61425efdcabf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Peripherals">
+      <UniqueIdentifier>{78fc558c-3d68-40d4-b56d-b92756223d68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Terminal">
+      <UniqueIdentifier>{b3c8d443-dc14-4b3d-8bd7-5585d14383ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Terminal\AXI4">
+      <UniqueIdentifier>{ecbdbf89-7350-40f3-9acb-e97003abb12a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Terminal\Components">
+      <UniqueIdentifier>{3bb1dd6a-dc8e-4d79-b643-2c66975fd3ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Network">
+      <UniqueIdentifier>{4c1eaa18-5c2e-46b4-be13-4ffda5c731c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Peripherals">
+      <UniqueIdentifier>{4741f768-ad0f-4f04-bd18-d2fb0db2e574}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Terminal">
+      <UniqueIdentifier>{4d6a528b-cbe2-40cf-83dd-d4776aab3668}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Terminal\AXI4">
+      <UniqueIdentifier>{e1650301-be51-4a68-90cf-de55a868284e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Terminal\Components">
+      <UniqueIdentifier>{1fd9c46e-339a-4a1e-9b38-c2c4d8473ff5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\InputData.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\OutputData.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Data\WeightData.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Record\TimingRecord.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Crossbar.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="FakeNoC.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Link.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Links.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Port.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Router.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="RouterPort.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="TerminalPort.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="VirtualChannel.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ActivationFunctions.h">
+      <Filter>Header Files\Peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="Clock.h">
+      <Filter>Header Files\Peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="DataStructures.h">
+      <Filter>Header Files\Peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Header Files\Peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="Parameters.h">
+      <Filter>Header Files\Peripherals</Filter>
+    </ClInclude>
+    <ClInclude Include="DRAMNode.h">
+      <Filter>Header Files\Terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="PENode.h">
+      <Filter>Header Files\Terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="Channel.h">
+      <Filter>Header Files\Terminal\AXI4</Filter>
+    </ClInclude>
+    <ClInclude Include="MasterInterface.h">
+      <Filter>Header Files\Terminal\AXI4</Filter>
+    </ClInclude>
+    <ClInclude Include="SlaveInterface.h">
+      <Filter>Header Files\Terminal\AXI4</Filter>
+    </ClInclude>
+    <ClInclude Include="Subchannels.h">
+      <Filter>Header Files\Terminal\AXI4</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller.h">
+      <Filter>Header Files\Terminal\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="DRAM.h">
+      <Filter>Header Files\Terminal\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="NI.h">
+      <Filter>Header Files\Terminal\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="PE.h">
+      <Filter>Header Files\Terminal\Components</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Crossbar.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Links.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Network.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Router.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="RouterPort.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="TerminalPort.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="VirtualChannel.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="DRAMNode.cpp">
+      <Filter>Source Files\Terminal</Filter>
+    </ClCompile>
+    <ClCompile Include="PENode.cpp">
+      <Filter>Source Files\Terminal</Filter>
+    </ClCompile>
+    <ClCompile Include="Channel.cpp">
+      <Filter>Source Files\Terminal\AXI4</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller.cpp">
+      <Filter>Source Files\Terminal\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="DRAM.cpp">
+      <Filter>Source Files\Terminal\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="NI.cpp">
+      <Filter>Source Files\Terminal\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="PE.cpp">
+      <Filter>Source Files\Terminal\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ActivationFunctions.cpp">
+      <Filter>Source Files\Peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="DataStructures.cpp">
+      <Filter>Source Files\Peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>Source Files\Peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
