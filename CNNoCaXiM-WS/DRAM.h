@@ -13,9 +13,6 @@ extern std::string g_weightDataPath;
 extern std::string g_inputDataPath;
 extern std::string g_outputDataPath;
 
-extern std::string g_recordFolderPath;
-extern std::string g_timingRecordPath;
-
 class DRAM
 {
 public:
