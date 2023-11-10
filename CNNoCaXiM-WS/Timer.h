@@ -11,12 +11,12 @@ extern std::string g_timingRecordPath;
 class Timer
 {
 public:
-	void recordInputReadTime();
+	void recordStartTime();
+	void recordFinishTime();
 	void recordPacketTimeInitializeStart(const int seqID);
 	void recordPacketTimeInitializeFinish(const int seqID);
 	void recordPacketTimeAppendStart(const int seqID);
 	void recordPacketTimeAppendFinish(const int seqID);
-	void recordOutputWrittenTime();
 
 	std::unique_ptr<Clock> m_localClock{ std::make_unique<Clock>() };
 

@@ -68,7 +68,7 @@ void DRAM::receiveReadRequest()
 				m_slaveInterface.readDataChannel.RDATA = t_RDATA;
 				m_slaveInterface.readAddressChannel.ARREADY = true;
 				logDebug(" DRAM: read request for input data received ");
-				m_timer->recordInputReadTime();
+				m_timer->recordFinishTime();
 			}
 			else
 				throw std::out_of_range{ " DRAM: read request out of range " };
@@ -123,7 +123,7 @@ void DRAM::receiveWriteRequest()
 				m_slaveInterface.writeAddressChannel.AWREADY = true;
 				m_slaveInterface.writeDataChannel.WREADY = true;
 				logDebug(" DRAM: write request received ");
-				m_timer->recordOutputWrittenTime();
+				m_timer->recordStartTime();
 			}
 			else
 				throw std::out_of_range{ " DRAM: write request out of range " };

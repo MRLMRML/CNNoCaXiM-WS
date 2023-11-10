@@ -3,6 +3,8 @@
 //#define DEBUGROUTER
 //#define MEASURE
 #define CLOCK
+#define TIMER
+#define TIMER_DETAILED
 
 #define DATA_PRECISION float
 
@@ -35,7 +37,7 @@
 
 // PE timing
 #define EXECUTION_TIME_PE_WI 1
-#define EXECUTION_TIME_PE_II 1 // PE calculation time, not used
+#define EXECUTION_TIME_PE_II 20 // PE calculation time, not used
 
 // NI timing
 #define EXECUTION_TIME_NI_WI 1
@@ -44,8 +46,8 @@
 
 //////////////////////// NoC parameters ////////////////////////
 // Network dimension
-#define NETWORK_DIMENSION_X 2
-#define NETWORK_DIMENSION_Y 1
+#define NETWORK_DIMENSION_X 4
+#define NETWORK_DIMENSION_Y 4
 #define ROUTER_NUMBER NETWORK_DIMENSION_X * NETWORK_DIMENSION_Y
 // choose network type:
 #define MESH

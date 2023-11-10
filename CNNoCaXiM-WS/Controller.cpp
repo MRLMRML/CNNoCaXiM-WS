@@ -132,6 +132,8 @@ void Controller::receiveReadInputResponse()
 		{
 			m_localClock->tickExecutionClock(EXECUTION_TIME_CONTROLLER_IO - 1);
 			m_localClock->toggleWaitingForExecution();
+
+			m_timer->recordStartTime();
 		}
 
 		if (m_localClock->executeLocalEvent())
@@ -337,6 +339,8 @@ void Controller::sendWriteOutputRequest(const Packet& packet)
 
 			m_masterInterface.writeDataChannel.WVALID = true;
 			m_masterInterface.writeDataChannel.WDATA = m_outputData;
+
+			m_timer->recordFinishTime();
 
 			m_controllerState = ControllerState::B;
 
