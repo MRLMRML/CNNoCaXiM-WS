@@ -22,14 +22,14 @@ public:
 
 	bool receiveFlit();
 	void assemblePacket(); // receive flits into m_flitReorderBuffer and form packet after Tail flit received
-	void receivePacket(const Packet packet);
+	void receivePacket(const Packet& packet);
 
-	void sendReadResponse(Packet packet);
+	void sendReadResponse(const Packet& packet);
 	
 	void receiveWriteOutputRequest();
 
-	void sendPacket(const Packet packet);
-	void dismantlePacket(const Packet packet); // break down packet into flits
+	void sendPacket(const Packet& packet);
+	void dismantlePacket(const Packet& packet); // break down packet into flits
 	void sendFlit();
 
 public:

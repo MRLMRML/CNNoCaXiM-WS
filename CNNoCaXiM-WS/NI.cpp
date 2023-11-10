@@ -88,7 +88,7 @@ void NI::assemblePacket()
 	}
 }
 
-void NI::receivePacket(const Packet packet)
+void NI::receivePacket(const Packet& packet)
 {
 	logDebug(" NI: packet received ");
 	viewPacket(packet);
@@ -115,7 +115,7 @@ void NI::receivePacket(const Packet packet)
 	//}
 }
 
-void NI::sendReadResponse(Packet packet)
+void NI::sendReadResponse(const Packet& packet)
 {
 	if (!m_localClock->isWaitingForExecution())
 	{
@@ -187,14 +187,14 @@ void NI::receiveWriteOutputRequest()
 	}
 }
 
-void NI::sendPacket(const Packet packet)
+void NI::sendPacket(const Packet& packet)
 {
 	dismantlePacket(packet);
 	logDebug(" NI: packet sent ");
 	viewPacket(packet);
 }
 
-void NI::dismantlePacket(const Packet packet)
+void NI::dismantlePacket(const Packet& packet)
 {
 	//double flitCount{ ceil(PACKET_SIZE / FLIT_SIZE) }; // number of flits in total
 	//double flitCount{ ceil(sizeof(packet) / FLIT_SIZE) }; // number of flits in total

@@ -4059,7 +4059,7 @@ void Router::updateEnable()
 
 void Router::viewData()
 {
-#if defined (DEBUGROUTER)
+#if defined (DEBUG_ROUTER)
 	// view terminal port
 	viewTerminalPortData();
 
