@@ -47,7 +47,7 @@ void PE::receiveReadInputResponse()
 		if (!m_localClock->isWaitingForExecution())
 		{
 			//m_localClock->tickExecutionClock(EXECUTION_TIME_PE_II - 1);
-			m_localClock->tickExecutionClock(m_weightData.size() - 1 - 1);
+			m_localClock->tickExecutionClock(m_weightData.size() - 1); // activation function also takes one cycle
 			m_localClock->toggleWaitingForExecution();
 
 			m_timer->recordPacketTimeAppendStart(m_masterInterface.readDataChannel.RID);
