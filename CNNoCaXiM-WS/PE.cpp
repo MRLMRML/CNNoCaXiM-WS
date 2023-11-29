@@ -25,6 +25,8 @@ void PE::receiveWriteRequest()
 		{
 			m_localClock->tickExecutionClock(EXECUTION_TIME_PE_WI - 1);
 			m_localClock->toggleWaitingForExecution();
+
+			m_timer->recordPacketTimeAppendStart(m_slaveInterface.writeAddressChannel.AWID); // this is SEQID of the packet
 		}
 
 		if (m_localClock->executeLocalEvent())
@@ -37,6 +39,8 @@ void PE::receiveWriteRequest()
 			sendWriteResponse();
 
 			m_peState = PEState::I;
+
+			m_timer->recordPacketTimeAppendFinish(m_slaveInterface.writeAddressChannel.AWID); // this RID is SEQID of the packet, while the real RID is stored in the NI
 
 			m_localClock->tickTriggerClock(1);
 			m_localClock->tickExecutionClock(1);

@@ -124,21 +124,24 @@ void NI::sendWriteRequest(const Packet& packet)
 	{
 		m_localClock->tickExecutionClock(EXECUTION_TIME_NI_WK - 1);
 		m_localClock->toggleWaitingForExecution();
+
+		m_timer->recordPacketTimeAppendStart(packet.SEQID);
 	}
 
 	if (m_localClock->executeLocalEvent())
 	{
 		m_masterInterface.writeAddressChannel.AWVALID = true;
-		m_masterInterface.writeAddressChannel.AWID = packet.xID; // should be -1
+		m_masterInterface.writeAddressChannel.AWID = packet.SEQID; // should be -1,AWID is SEQID instead of xID, for timing purpose
 
 		m_masterInterface.writeDataChannel.WVALID = true;
 		m_masterInterface.writeDataChannel.WDATA = packet.xDATA;
 
-		m_DRAMID = packet.destination;
-
-		//m_timer->recordFinishTime();
+		m_xID = packet.xID; // should be -1
+		m_DRAMID = packet.SID; // DRAMID is SID in packet
 
 		m_niState = NIState::K;
+
+		m_timer->recordPacketTimeAppendFinish(packet.SEQID);
 
 		m_localClock->tickTriggerClock(1);
 		m_localClock->tickExecutionClock(1);
@@ -151,8 +154,9 @@ void NI::sendReadResponse(const Packet& packet)
 	if (!m_localClock->isWaitingForExecution())
 	{
 		m_localClock->tickExecutionClock(EXECUTION_TIME_NI_IO - 1);
-		m_timer->recordPacketTimeAppendStart(packet.SEQID);
 		m_localClock->toggleWaitingForExecution();
+
+		m_timer->recordPacketTimeAppendStart(packet.SEQID);
 	}
 
 	if (m_localClock->executeLocalEvent())
@@ -162,7 +166,7 @@ void NI::sendReadResponse(const Packet& packet)
 		m_slaveInterface.readDataChannel.RDATA = packet.xDATA;
 
 		m_xID = packet.xID;
-		m_DRAMID = packet.destination;
+		m_DRAMID = packet.SID; // DRAMID is SID in packet
 
 		m_niState = NIState::O;
 
@@ -182,19 +186,24 @@ void NI::receiveWriteResponse()
 		{
 			m_localClock->tickExecutionClock(EXECUTION_TIME_NI_KI - 1);
 			m_localClock->toggleWaitingForExecution();
+
+			m_timer->recordPacketTimeAppendStart(m_masterInterface.writeResponseChannel.BID);
 		}
 
 		if (m_localClock->executeLocalEvent())
 		{
 			Packet writeResponse{};
 			writeResponse.destination = m_DRAMID;
-			writeResponse.xID = m_masterInterface.writeResponseChannel.BID;
+			writeResponse.xID = m_xID;
 			writeResponse.RWQB = PacketType::WriteResponse;
 			writeResponse.MID = m_DRAMID;
 			writeResponse.SID = m_NID;
-			//writeResponse.SEQID = ; // keep the reformed input data sequenced
+			writeResponse.SEQID = m_masterInterface.writeResponseChannel.BID; // just for timing purpose
 
 			sendPacket(writeResponse);
+
+			m_timer->recordPacketTimeAppendFinish(writeResponse.SEQID);
+
 			m_masterInterface.writeResponseChannel.BREADY = true;
 			m_niState = NIState::I;
 
@@ -257,7 +266,7 @@ void NI::dismantlePacket(const Packet& packet)
 	//double flitCount{ ceil(sizeof(packet) / FLIT_SIZE) }; // number of flits in total
 	double flitCount{ static_cast<double>(packet.xDATA.size()) };
 
-	if (flitCount == 1) // H/T flit
+	if (flitCount == 0 || flitCount == 1) // H/T flit
 	{
 		Flit headTailFlit{ PortType::Unselected, -1, FlitType::HeadTailFlit, packet };
 		m_sourceQueue.push_back(headTailFlit);
