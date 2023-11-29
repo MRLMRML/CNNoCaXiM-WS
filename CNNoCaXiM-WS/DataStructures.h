@@ -227,6 +227,7 @@ enum class ControllerState
 {
 	N,
 	W,
+	K,
 	I,
 	O,
 	B
@@ -237,6 +238,7 @@ std::ostream& operator<<(std::ostream& stream, const ControllerState& controller
 enum class NIState
 {
 	W,
+	K,
 	I,
 	O
 };

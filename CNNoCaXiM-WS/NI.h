@@ -24,9 +24,11 @@ public:
 	void assemblePacket(); // receive flits into m_flitReorderBuffer and form packet after Tail flit received
 	void receivePacket(const Packet& packet);
 
+	void sendWriteRequest(const Packet& packet);
 	void sendReadResponse(const Packet& packet);
 	
-	void receiveWriteOutputRequest();
+	void receiveWriteResponse();
+	void receiveWriteRequest();
 
 	void sendPacket(const Packet& packet);
 	void dismantlePacket(const Packet& packet); // break down packet into flits
@@ -36,9 +38,10 @@ public:
 	NIState m_niState{};
 	Port m_port{};
 	SlaveInterface m_slaveInterface{ };
+	MasterInterface m_masterInterface{ };
 	int m_NID{}; // node ID of this PE
 	int m_DRAMID{}; // node ID of DRAM
-	int m_xID{ -1 };
+	int m_xID{ -1 }; // only for inputs xID in sendReadResponse(), where RID is SEQID
 	std::shared_ptr<Clock> m_localClock{ nullptr };
 	std::unique_ptr<Timer> m_timer{ std::make_unique<Timer>() };
 

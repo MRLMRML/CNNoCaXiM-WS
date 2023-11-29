@@ -24,7 +24,8 @@
 //////////////////////// Timing ////////////////////////
 // Controller
 #define EXECUTION_TIME_CONTROLLER_NW 1
-#define EXECUTION_TIME_CONTROLLER_WI 1
+#define EXECUTION_TIME_CONTROLLER_WK 1
+#define EXECUTION_TIME_CONTROLLER_KI 1
 #define EXECUTION_TIME_CONTROLLER_IO 1
 #define EXECUTION_TIME_CONTROLLER_OO 1
 #define EXECUTION_TIME_CONTROLLER_OB 1
@@ -40,7 +41,8 @@
 #define EXECUTION_TIME_PE_II 20 // PE calculation time, not used
 
 // NI timing
-#define EXECUTION_TIME_NI_WI 1
+#define EXECUTION_TIME_NI_WK 1
+#define EXECUTION_TIME_NI_KI 1
 #define EXECUTION_TIME_NI_IO 1
 #define EXECUTION_TIME_NI_OI 1
 
