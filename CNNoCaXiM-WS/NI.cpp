@@ -53,7 +53,6 @@ bool NI::receiveFlit()
 
 void NI::assemblePacket()
 {
-	//while (receiveFlit())
 	if (receiveFlit())
 	{
 		if (m_flitReorderBuffer.back().flitType == FlitType::HeadTailFlit)
@@ -318,11 +317,5 @@ void NI::sendFlit()
 		m_port.m_outFlitRegister.push_back(m_sourceQueue.front());
 		m_sourceQueue.pop_front();
 	}
-
-	//while (!m_sourceQueue.empty())
-	//{
-	//	m_port.m_outFlitRegister.push_back(m_sourceQueue.front());
-	//	m_sourceQueue.pop_front();
-	//}
 }
 
