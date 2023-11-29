@@ -93,7 +93,7 @@ void Controller::receiveWriteWeightRequest()
 	writeRequest.RWQB = PacketType::WriteRequest;
 	writeRequest.MID = m_PEID;
 	writeRequest.SID = m_NID;
-	writeRequest.SEQID = m_masterInterface.readDataChannel.RID; // should be -1
+	writeRequest.SEQID = -m_PEID; // should be -1
 	writeRequest.xDATA = m_masterInterface.readDataChannel.RDATA;
 
 	sendPacket(writeRequest);
