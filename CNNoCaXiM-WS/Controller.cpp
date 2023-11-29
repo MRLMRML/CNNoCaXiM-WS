@@ -243,6 +243,9 @@ void Controller::sendFlit()
 		if (m_sourceQueue.front().flitType == FlitType::HeadFlit ||
 			m_sourceQueue.front().flitType == FlitType::HeadTailFlit)
 			m_timer->recordPacketTimeAppendFinish(m_sourceQueue.front().SEQID);
+		//if (m_sourceQueue.front().flitType == FlitType::TailFlit ||
+		//	m_sourceQueue.front().flitType == FlitType::HeadTailFlit)
+		//	m_timer->recordPacketTimeAppendFinish(m_sourceQueue.front().SEQID);
 		m_sourceQueue.pop_front();
 	}
 }
