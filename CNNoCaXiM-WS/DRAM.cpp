@@ -51,6 +51,7 @@ void DRAM::receiveReadRequest()
 				m_slaveInterface.readDataChannel.RDATA = t_RDATA;
 				m_slaveInterface.readAddressChannel.ARREADY = true;
 				logDebug(" DRAM: read request for weight data received ");
+				m_timer->recordFinishTime();
 			}
 			else if (m_slaveInterface.readAddressChannel.ARADDR >= INPUT_DATA_START_LOCATION
 				&& m_slaveInterface.readAddressChannel.ARADDR < INPUT_DATA_START_LOCATION + INPUT_DATA_LINE_COUNT)

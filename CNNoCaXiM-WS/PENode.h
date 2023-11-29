@@ -14,12 +14,15 @@ public:
 		: m_NI{ std::make_unique<NI>(NID) },
 		m_PE{ std::make_unique<PE>() },
 		m_masterChannel{ std::make_unique<Channel>() },
+		m_slaveChannel{ std::make_unique<Channel>() },
 		m_localClock{ std::make_shared<Clock>() }
 	{
 		m_masterChannel->setUpConnection(m_PE->m_masterInterface, m_NI->m_slaveInterface);
+		m_slaveChannel->setUpConnection(m_NI->m_masterInterface, m_PE->m_slaveInterface);
 		m_NI->m_localClock = m_localClock;
 		m_PE->m_localClock = m_localClock;
 		m_masterChannel->m_localClock = m_localClock;
+		m_slaveChannel->m_localClock = m_localClock;
 	}
 
 	PENode(const int NID,
@@ -27,17 +30,21 @@ public:
 		: m_NI{ std::make_unique<NI>(NID) },
 		m_PE{ std::make_unique<PE>(activationFunction) },
 		m_masterChannel{ std::make_unique<Channel>() },
+		m_slaveChannel{ std::make_unique<Channel>() },
 		m_localClock{ std::make_shared<Clock>() }
 	{
 		m_masterChannel->setUpConnection(m_PE->m_masterInterface, m_NI->m_slaveInterface);
+		m_slaveChannel->setUpConnection(m_NI->m_masterInterface, m_PE->m_slaveInterface);
 		m_NI->m_localClock = m_localClock;
 		m_PE->m_localClock = m_localClock;
 		m_masterChannel->m_localClock = m_localClock;
+		m_slaveChannel->m_localClock = m_localClock;
 	}
 
 	~PENode()
 	{
 		m_masterChannel->terminateConnection();
+		m_slaveChannel->terminateConnection();
 	}
 
 	void runOneStep();
@@ -46,6 +53,7 @@ public:
 	std::unique_ptr<NI> m_NI{ nullptr };
 	std::unique_ptr<PE> m_PE{ nullptr };
 	std::unique_ptr<Channel> m_masterChannel{ nullptr };
+	std::unique_ptr<Channel> m_slaveChannel{ nullptr };
 	std::shared_ptr<Clock> m_localClock{ nullptr };
 
 private:

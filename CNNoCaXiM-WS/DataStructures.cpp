@@ -179,6 +179,9 @@ std::ostream& operator<<(std::ostream& stream, const ControllerState& controller
 	case ControllerState::W:
 		stream << "W";
 		break;
+	case ControllerState::K:
+		stream << "K";
+		break;
 	case ControllerState::I:
 		stream << "I";
 		break;
@@ -198,6 +201,9 @@ std::ostream& operator<<(std::ostream& stream, const NIState& niState)
 	{
 	case NIState::W:
 		stream << "W";
+		break;
+	case NIState::K:
+		stream << "K";
 		break;
 	case NIState::I:
 		stream << "I";

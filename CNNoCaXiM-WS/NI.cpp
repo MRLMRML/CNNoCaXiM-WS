@@ -9,11 +9,14 @@ void NI::runOneStep()
 		case NIState::W:
 			assemblePacket();
 			break;
+		case NIState::K:
+			receiveWriteResponse();
+			break;
 		case NIState::I:
 			assemblePacket();
 			break;
 		case NIState::O:
-			receiveWriteOutputRequest();
+			receiveWriteRequest();
 			break;
 		}
 	}
@@ -103,11 +106,11 @@ void NI::receivePacket(const Packet& packet)
 		sendReadResponse(packet);
 		return;
 	}
-	//if (packet.RWQB == PacketType::WriteRequest)
-	//{
-	//	sendWriteRequest(packet);
-	//	return;
-	//}
+	if (packet.RWQB == PacketType::WriteRequest)
+	{
+		sendWriteRequest(packet);
+		return;
+	}
 	//if (packet.RWQB == PacketType::WriteResponse)
 	//{
 	//	sendWriteOutputResponse(packet);
@@ -115,40 +118,103 @@ void NI::receivePacket(const Packet& packet)
 	//}
 }
 
-void NI::sendReadResponse(const Packet& packet)
+void NI::sendWriteRequest(const Packet& packet)
 {
 	if (!m_localClock->isWaitingForExecution())
 	{
-		if (m_niState == NIState::W)
-			m_localClock->tickExecutionClock(EXECUTION_TIME_NI_WI - 1);
-		else if (m_niState == NIState::I)
-		{
-			m_localClock->tickExecutionClock(EXECUTION_TIME_NI_IO - 1);
-			m_timer->recordPacketTimeAppendStart(packet.SEQID);
-		}
+		m_localClock->tickExecutionClock(EXECUTION_TIME_NI_WK - 1);
 		m_localClock->toggleWaitingForExecution();
+
+		m_timer->recordPacketTimeAppendStart(packet.SEQID);
 	}
 
 	if (m_localClock->executeLocalEvent())
 	{
-		m_slaveInterface.readDataChannel.RVALID = true;
-		m_slaveInterface.readDataChannel.RID = packet.SEQID;
-		m_slaveInterface.readDataChannel.RDATA = packet.xDATA;
-		m_xID = packet.xID;
-		if (m_niState == NIState::W)
-			m_niState = NIState::I;
-		else if (m_niState == NIState::I)
-		{
-			m_niState = NIState::O;
-			m_timer->recordPacketTimeAppendFinish(packet.SEQID);
-		}
+		m_masterInterface.writeAddressChannel.AWVALID = true;
+		m_masterInterface.writeAddressChannel.AWID = packet.SEQID; // should be -1,AWID is SEQID instead of xID, for timing purpose
+
+		m_masterInterface.writeDataChannel.WVALID = true;
+		m_masterInterface.writeDataChannel.WDATA = packet.xDATA;
+
+		m_xID = packet.xID; // should be -1
+		m_DRAMID = packet.SID; // DRAMID is SID in packet
+
+		m_niState = NIState::K;
+
+		m_timer->recordPacketTimeAppendFinish(packet.SEQID);
+
 		m_localClock->tickTriggerClock(1);
 		m_localClock->tickExecutionClock(1);
 		m_localClock->toggleWaitingForExecution();
 	}
 }
 
-void NI::receiveWriteOutputRequest()
+void NI::sendReadResponse(const Packet& packet)
+{
+	if (!m_localClock->isWaitingForExecution())
+	{
+		m_localClock->tickExecutionClock(EXECUTION_TIME_NI_IO - 1);
+		m_localClock->toggleWaitingForExecution();
+
+		m_timer->recordPacketTimeAppendStart(packet.SEQID);
+	}
+
+	if (m_localClock->executeLocalEvent())
+	{
+		m_slaveInterface.readDataChannel.RVALID = true;
+		m_slaveInterface.readDataChannel.RID = packet.SEQID; // RID is SEQID instead of xID, for timing purpose
+		m_slaveInterface.readDataChannel.RDATA = packet.xDATA;
+
+		m_xID = packet.xID;
+		m_DRAMID = packet.SID; // DRAMID is SID in packet
+
+		m_niState = NIState::O;
+
+		m_timer->recordPacketTimeAppendFinish(packet.SEQID);
+		
+		m_localClock->tickTriggerClock(1);
+		m_localClock->tickExecutionClock(1);
+		m_localClock->toggleWaitingForExecution();
+	}
+}
+
+void NI::receiveWriteResponse()
+{
+	if (m_masterInterface.writeResponseChannel.BREADY == false)
+	{
+		if (!m_localClock->isWaitingForExecution())
+		{
+			m_localClock->tickExecutionClock(EXECUTION_TIME_NI_KI - 1);
+			m_localClock->toggleWaitingForExecution();
+
+			m_timer->recordPacketTimeAppendStart(m_masterInterface.writeResponseChannel.BID);
+		}
+
+		if (m_localClock->executeLocalEvent())
+		{
+			Packet writeResponse{};
+			writeResponse.destination = m_DRAMID;
+			writeResponse.xID = m_xID;
+			writeResponse.RWQB = PacketType::WriteResponse;
+			writeResponse.MID = m_DRAMID;
+			writeResponse.SID = m_NID;
+			writeResponse.SEQID = m_masterInterface.writeResponseChannel.BID; // just for timing purpose
+
+			sendPacket(writeResponse);
+
+			m_timer->recordPacketTimeAppendFinish(writeResponse.SEQID);
+
+			m_masterInterface.writeResponseChannel.BREADY = true;
+			m_niState = NIState::I;
+
+			m_localClock->tickTriggerClock(1);
+			m_localClock->tickExecutionClock(1);
+			m_localClock->toggleWaitingForExecution();
+		}
+	}
+}
+
+void NI::receiveWriteRequest()
 {
 	if (m_slaveInterface.writeAddressChannel.AWREADY == false && m_slaveInterface.writeDataChannel.WREADY == false)
 	{
@@ -200,7 +266,7 @@ void NI::dismantlePacket(const Packet& packet)
 	//double flitCount{ ceil(sizeof(packet) / FLIT_SIZE) }; // number of flits in total
 	double flitCount{ static_cast<double>(packet.xDATA.size()) };
 
-	if (flitCount == 1) // H/T flit
+	if (flitCount == 0 || flitCount == 1) // H/T flit
 	{
 		Flit headTailFlit{ PortType::Unselected, -1, FlitType::HeadTailFlit, packet };
 		m_sourceQueue.push_back(headTailFlit);

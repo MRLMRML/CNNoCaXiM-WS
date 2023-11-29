@@ -21,6 +21,7 @@ public:
 
 	void sendReadWeightRequest();
 	void receiveReadWeightResponse();
+	void receiveWriteWeightRequest();
 
 	void sendReadInputRequest();
 	void reformInputData(const std::vector<DATA_PRECISION>& inputData);
@@ -34,6 +35,7 @@ public:
 	void assemblePacket(); // receive flits into m_flitReorderBuffer and form packet after Tail flit received
 	void receivePacket(const Packet& packet);
 
+	void sendWriteWeightResponse(const Packet& packet);
 	void sendWriteOutputRequest(const Packet& packet);
 	void receiveWriteOutputResponse();
 

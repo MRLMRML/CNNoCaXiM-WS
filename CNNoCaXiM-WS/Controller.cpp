@@ -12,6 +12,9 @@ void Controller::runOneStep()
 		case ControllerState::W:
 			receiveReadWeightResponse();
 			break;
+		case ControllerState::K:
+			assemblePacket();
+			break;
 		case ControllerState::I:
 			receiveReadInputResponse();
 			break;
@@ -69,32 +72,40 @@ void Controller::receiveReadWeightResponse()
 	{
 		if (!m_localClock->isWaitingForExecution())
 		{
-			m_localClock->tickExecutionClock(EXECUTION_TIME_CONTROLLER_WI - 1);
+			m_localClock->tickExecutionClock(EXECUTION_TIME_CONTROLLER_WK - 1);
 			m_localClock->toggleWaitingForExecution();
+
+			m_timer->recordStartTime();
 		}
 
 		if (m_localClock->executeLocalEvent())
 		{
-			Packet readResponse{};
-			readResponse.destination = m_PEID;
-			readResponse.xID = m_masterInterface.readDataChannel.RID; // should be -1
-			readResponse.RWQB = PacketType::ReadResponse;
-			readResponse.MID = m_PEID;
-			readResponse.SID = m_NID;
-			readResponse.xDATA = m_masterInterface.readDataChannel.RDATA;
-
-			sendPacket(readResponse);
-
-			m_masterInterface.readDataChannel.RREADY = true;
-			m_controllerState = ControllerState::I;
-
-			sendReadInputRequest();
-
-			m_localClock->tickTriggerClock(1);
-			m_localClock->tickExecutionClock(1);
-			m_localClock->toggleWaitingForExecution();
+			receiveWriteWeightRequest();
 		}
 	}
+}
+
+void Controller::receiveWriteWeightRequest()
+{
+	Packet writeRequest{};
+	writeRequest.destination = m_PEID;
+	writeRequest.xID = m_masterInterface.readDataChannel.RID; // should be -1
+	writeRequest.RWQB = PacketType::WriteRequest;
+	writeRequest.MID = m_PEID;
+	writeRequest.SID = m_NID;
+	writeRequest.SEQID = m_masterInterface.readDataChannel.RID; // should be -1
+	writeRequest.xDATA = m_masterInterface.readDataChannel.RDATA;
+
+	sendPacket(writeRequest);
+
+	m_timer->recordPacketTimeInitializeFinish(writeRequest.SEQID);
+
+	m_masterInterface.readDataChannel.RREADY = true;
+	m_controllerState = ControllerState::K;
+
+	m_localClock->tickTriggerClock(1);
+	m_localClock->tickExecutionClock(1);
+	m_localClock->toggleWaitingForExecution();
 }
 
 void Controller::sendReadInputRequest()
@@ -229,14 +240,11 @@ void Controller::sendFlit()
 		&& m_port.m_outFlitRegister.size() < REGISTER_DEPTH)
 	{
 		m_port.m_outFlitRegister.push_back(m_sourceQueue.front());
+		if (m_sourceQueue.front().flitType == FlitType::HeadFlit ||
+			m_sourceQueue.front().flitType == FlitType::HeadTailFlit)
+			m_timer->recordPacketTimeAppendFinish(m_sourceQueue.front().SEQID);
 		m_sourceQueue.pop_front();
 	}
-
-	//while (!m_sourceQueue.empty())
-	//{
-	//	m_port.m_outFlitRegister.push_back(m_sourceQueue.front());
-	//	m_sourceQueue.pop_front();
-	//}
 }
 
 bool Controller::receiveFlit()
@@ -254,7 +262,6 @@ bool Controller::receiveFlit()
 
 void Controller::assemblePacket()
 {
-	//while (receiveFlit())
 	if (receiveFlit())
 	{
 		if (m_flitReorderBuffer.back().flitType == FlitType::HeadTailFlit)
@@ -312,11 +319,40 @@ void Controller::receivePacket(const Packet& packet)
 		sendWriteOutputRequest(packet);
 		return;
 	}
-	//if (packet.RWQB == PacketType::WriteResponse)
-	//{
-	//	sendWriteResponse(packet);
-	//	return;
-	//}
+	if (packet.RWQB == PacketType::WriteResponse)
+	{
+		sendWriteWeightResponse(packet);
+		return;
+	}
+}
+
+void Controller::sendWriteWeightResponse(const Packet& packet)
+{
+	if (!m_localClock->isWaitingForExecution())
+	{
+		m_localClock->tickExecutionClock(EXECUTION_TIME_CONTROLLER_KI - 1);
+		m_localClock->toggleWaitingForExecution();
+
+		m_timer->recordPacketTimeAppendStart(packet.SEQID);
+	}
+
+	if (m_localClock->executeLocalEvent())
+	{
+		if (packet.xID == -1)
+		{
+			m_timer->recordFinishTime();
+
+			m_controllerState = ControllerState::I;
+
+			sendReadInputRequest();
+
+			m_localClock->tickTriggerClock(1);
+			m_localClock->tickExecutionClock(1);
+			m_localClock->toggleWaitingForExecution();
+		}
+		else
+			throw std::runtime_error{ " Controller: xID should be -1 for weights " };
+	}
 }
 
 void Controller::sendWriteOutputRequest(const Packet& packet)
